@@ -1,4 +1,5 @@
 #include "man.h"
+#include <sys/mman.h>
 #include <string.h>
 
 MWorker *man_get_timer_worker(MAN *man);
@@ -14,6 +15,55 @@ _Static_assert(sizeof(struct man)         == 32806 * 8, "update MAN _opaque size
 _Static_assert(sizeof(struct mworker)     ==     9 * 8, "update MWorker _opaque size in green_man.h");
 _Static_assert(sizeof(struct cond)        ==     3 * 8, "update Cond _opaque size in green_man.h");
 _Static_assert(sizeof(struct worker_cond) ==     2 * 8, "update WorkerCond _opaque size in green_man.h");
+
+MAN *man_setup(long worker_count,
+               long stack_size,
+               void (*work_fun)(MWorker *worker, MDatum arg))
+{
+  if (worker_count < 1 || stack_size < 1024)
+    goto err;
+
+  MAN *man = malloc(sizeof(MAN));
+  if (!man)
+    goto err;
+
+  man_init(man, work_fun);
+
+  u8 *stacks = malloc(worker_count * (4096 + stack_size) + 4095);
+  if (!stacks)
+    goto err1;
+
+  MWorker *workers = malloc(sizeof(MWorker) * worker_count);
+  if (!workers)
+    goto err2;
+
+  // align to 4096
+  u64 ptr = (u64)stacks;
+  ptr += 4095;
+  ptr &= ~4095;
+
+  for (long i = 0; i < worker_count; ++i) {
+    // protect the stack to catch bugs more easily
+    if (mprotect((void *)ptr, 4096, PROT_NONE) != 0)
+      goto err3;
+
+    MWorker *w = workers + i;
+    ptr += 4096 + stack_size;  // stack is the top address
+    mworker_init(w, (void *)ptr);
+    man_add_worker(man, w);
+  }
+
+  return man;
+
+err3:
+  free(workers);
+err2:
+  free(stacks);
+err1:
+  free(man);
+err:
+  return NULL;
+}
 
 MAN *mworker_get_man(MWorker *worker)
 {

@@ -44,6 +44,10 @@ union mdatum {
 
 /* ── Lifecycle ───────────────────────────────────────────────────── */
 
+MAN *man_setup(long worker_count,
+               long stack_size,
+               void (*work_fun)(MWorker *worker, MDatum arg));
+
 int  man_init(MAN *man, void (*work_fun)(MWorker *worker, MDatum arg));
 void man_add_worker(MAN *man, MWorker *worker);
 void mworker_init(MWorker *worker, void *stack_top);

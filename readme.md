@@ -4,8 +4,6 @@ GREEN MAN is a single-threaded amd64 green-threads runtime for C that "asyncfies
 
 It is intended for high-concurrency servers and event-driven applications where you want C-level control and performance without turning your entire program into callbacks.
 
-> **Status:** still evolving. APIs may change.
-
 ---
 
 ## Highlights
@@ -151,6 +149,9 @@ void man_add_worker(MAN *man, MWorker *worker);
 ### Worker setup and returning
 
 ```c
+MAN *man_setup(long worker_count,
+               long stack_size,
+               void (*work_fun)(MWorker *worker, MDatum arg));
 void mworker_init(MWorker *worker, void *stack_top);
 void man_return(MWorker *worker);
 ```
@@ -267,15 +268,7 @@ static void work_fun(MWorker *worker, MDatum arg)
 
 int main(void)
 {
-  MAN *man = malloc(sizeof(MAN));
-  man_init(man, work_fun);
-
-  for (int i = 0; i < 128; i++) {
-    char *stack = malloc(32 * 1024);
-    MWorker *w = malloc(sizeof(MWorker));
-    mworker_init(w, stack + 32 * 1024);
-    man_add_worker(man, w);
-  }
+  MAN *man = man_setup(128, 32 * 1024, work_fun);
 
   int server = socket(AF_INET, SOCK_STREAM, 0);
 
