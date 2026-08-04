@@ -42,6 +42,7 @@ struct cond {
   Cond *next;
   WorkerCond *waiters;
   unsigned long wake_n;
+  int queued;
 };
 
 struct worker_cond {

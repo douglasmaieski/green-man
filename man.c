@@ -13,7 +13,7 @@ MWorker *_get_conds_wake(MAN *man);
 
 _Static_assert(sizeof(struct man)         == 32806 * 8, "update MAN _opaque size in green_man.h");
 _Static_assert(sizeof(struct mworker)     ==     9 * 8, "update MWorker _opaque size in green_man.h");
-_Static_assert(sizeof(struct cond)        ==     3 * 8, "update Cond _opaque size in green_man.h");
+_Static_assert(sizeof(struct cond)        ==     4 * 8, "update Cond _opaque size in green_man.h");
 _Static_assert(sizeof(struct worker_cond) ==     2 * 8, "update WorkerCond _opaque size in green_man.h");
 
 MAN *man_setup(long worker_count,

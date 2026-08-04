@@ -30,7 +30,7 @@ typedef struct worker_cond WorkerCond;
 
 struct man         { u64 _opaque[32806]; };
 struct mworker     { u64 _opaque[9];     };
-struct cond        { u64 _opaque[3];     };
+struct cond        { u64 _opaque[4];     };
 struct worker_cond { u64 _opaque[2];     };
 
 /* ── Value type (must be visible so callers can construct literals) ─ */
